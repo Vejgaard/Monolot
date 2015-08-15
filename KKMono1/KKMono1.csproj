@@ -38,6 +38,7 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Animal.cs" />
     <Compile Include="Game3D.cs" />
     <Compile Include="GameBubbles.cs" />
     <Compile Include="GeometricalPrimitives.cs" />

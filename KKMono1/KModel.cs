@@ -13,6 +13,10 @@ namespace KKMono1
     {
         public Vector3 Pt;
 
+        public KVertex Clone()
+        {
+            return new KVertex { Pt = Pt };
+        }
     }
 
     public class KFacet
@@ -26,6 +30,11 @@ namespace KKMono1
         public Vector2 Tex0;
         public Vector2 Tex1;
         public Vector2 Tex2;
+
+        public KFacet Clone()
+        {
+            return new KFacet { Ve0 = Ve0, Ve1 = Ve1, Ve2 = Ve2, Tex0 = Tex0, Tex1 = Tex1, Tex2 = Tex2 };
+        }
     }
 
     public class KModel
@@ -51,11 +60,28 @@ namespace KKMono1
             return Facets.Count - 1;
         }
 
-        //public void Transform(Matrix
+        public void Transform(Matrix m)
+        {
+            foreach (var vertex in Vertices)
+            {
+                vertex.Pt = Vector3.Transform(vertex.Pt, m);
+            }
+        }
 
         public void Append(KModel other)
-        { 
+        {
+            var vertexCount = Vertices.Count;
 
+            Vertices.AddRange(other.Vertices.Select(v => v.Clone()));
+
+            foreach (var facet in other.Facets)
+            {
+                var newFacet = facet.Clone();
+                newFacet.Ve0 += vertexCount;
+                newFacet.Ve1 += vertexCount;
+                newFacet.Ve2 += vertexCount;
+                Facets.Add(newFacet);
+            }
         }
     }
 }

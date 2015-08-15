@@ -48,33 +48,12 @@ namespace KKMono1
             GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
 
             // TODO: Add your initialization logic here
-/*            var floorVerts = new VertexPositionTexture[6];
-
-            floorVerts[0].Position = new Vector3(-5, -5, 0);
-            floorVerts[1].Position = new Vector3(5, -5, 0);
-            floorVerts[2].Position = new Vector3(-5, 5, 0);
-
-            floorVerts[3].Position = floorVerts[2].Position;
-            floorVerts[4].Position = floorVerts[1].Position;
-            floorVerts[5].Position = new Vector3(5, 5, 0);
-
-            floorVerts[0].TextureCoordinate = new Vector2(0, 1);
-            floorVerts[1].TextureCoordinate = new Vector2(1, 1);
-            floorVerts[2].TextureCoordinate = new Vector2(0, 0);
-
-            floorVerts[3].TextureCoordinate = floorVerts[2].TextureCoordinate;
-            floorVerts[4].TextureCoordinate = floorVerts[1].TextureCoordinate;
-            floorVerts[5].TextureCoordinate = new Vector2(1, 0);
-
-            buffer = new VertexBuffer(GraphicsDevice, VertexPositionTexture.VertexDeclaration, floorVerts.Length, BufferUsage.WriteOnly);
-            buffer.SetData(floorVerts);*/
 
             effect = new BasicEffect(GraphicsDevice);
-            /*effect.EnableDefaultLighting();
-            effect.PreferPerPixelLighting = true;*/
+            effect.EnableDefaultLighting();
+            effect.PreferPerPixelLighting = true;
 
-            Window.Title = "KK";
-
+            Window.Title = "Pila 2 (Alt + Enter for full screen)";
 
             base.Initialize();
         }
@@ -114,8 +93,13 @@ namespace KKMono1
             model.AddBox(new BoundingBox(new Vector3(3, 3, 1), new Vector3(5, 5, 3)), new Rectangle(0, 0, 64, 64));
             _drawableBox = new DrawableModel(model, imageBox, GraphicsDevice);
 
-            model = GeometricalPrimitives.CreateBall(3, new Rectangle(0, 0, 1, 1));
+            model = GeometricalPrimitives.CreateBall(2, new Rectangle(0, 0, 1, 1));
             model.TexCoordsAreInPixels = false;
+/*            model.Transform(Matrix.CreateTranslation(1, 0, 0));
+            var model2 = GeometricalPrimitives.CreateBall(3, new Rectangle(0, 0, 1, 1));
+            model2.Transform(Matrix.CreateScale(0.5f));
+            model2.Transform(Matrix.CreateTranslation(-1, 0, 0));
+            model.Append(model2);*/
             _drawableBall = new DrawableModel(model, imageBall, GraphicsDevice);
 
             // Matrix test
@@ -156,41 +140,47 @@ namespace KKMono1
             base.Update(gameTime);
         }
 
+        public Ball _ball1 = new Ball { Center = new Vector3(2, 0, 0), Radius = 1, Orientation = Matrix.Identity };
+        public Ball _ball2 = new Ball { Center = new Vector3(-2, 0, 0), Radius = 1, Orientation = Matrix.Identity };
+
         void DrawStuff()
         {
+            _ball1.Orientation = Matrix.CreateFromAxisAngle(new Vector3(2, 1, 0).Normalized(), count / 50f);
+            _ball2.Radius = 1 + 0.3f * (float)Math.Sin(count / 10f);
+
+
             // The assignment of effect.View and effect.Projection
             // are nearly identical to the code in the Model drawing code.
             var cameraPosition = new Vector3((float)(6 * Math.Cos(count / 30f)), (float)(6 * Math.Sin(count / 37f)), 10);
             var cameraLookAtVector = Vector3.Zero;
-            var cameraUpVector = Vector3.UnitY;// Vector3.UnitZ;
+            var cameraUpVector = Vector3.UnitY;
 
             effect.View = Matrix.CreateLookAt(
                 cameraPosition, cameraLookAtVector, cameraUpVector);
 
-            float aspectRatio =
+            //float aspect = graphics.GraphicsDevice.Viewport.Width / (float)graphics.GraphicsDevice.Viewport.Height;
+
+            float aspect =
                 graphics.PreferredBackBufferWidth / (float)graphics.PreferredBackBufferHeight;
             float fieldOfView = Microsoft.Xna.Framework.MathHelper.PiOver4;
             float nearClipPlane = 1;
             float farClipPlane = 200;
 
-            effect.Projection = Matrix.CreatePerspectiveFieldOfView(
-                fieldOfView, aspectRatio, nearClipPlane, farClipPlane);
+            effect.Projection = Matrix.CreatePerspectiveFieldOfView(fieldOfView, aspect, nearClipPlane, farClipPlane);
+
+
+
+            effect.World = Matrix.Identity;
 
             // Draw!
             _drawableKK.Draw(effect);
             _drawableBox.Draw(effect);
+
+            effect.World = _ball1.WorldTransform();
             _drawableBall.Draw(effect);
-            /*            effect.TextureEnabled = true;
-                        effect.Texture = imageKK;
 
-                        GraphicsDevice.SetVertexBuffer(buffer);
-                        foreach (var pass in effect.CurrentTechnique.Passes)
-                        {
-                            pass.Apply();
-
-                            GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleList, 0, buffer.VertexCount / 3);
-                            //GraphicsDevice.DrawUserPrimitives(PrimitiveType.TriangleList, floorVerts, 0, floorVerts.Length / 3);
-                        }*/
+            effect.World = _ball2.WorldTransform();
+            _drawableBall.Draw(effect);
         }
 
         /// <summary>
